@@ -43,5 +43,4 @@ Thumbs.db
 
 # Logs
 *.log
-test_report.html
-final_report.html
+*.html
