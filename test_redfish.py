@@ -10,27 +10,20 @@ from conftest import RedfishClient
 logger = logging.getLogger(__name__)
 
 class TestRedfishAuthentication:
-    """Тесты аутентификации в Redfish API"""
-    
     def test_authentication_success(self, redfish_client):
-        """Тест успешной аутентификации"""
         assert redfish_client.authenticated == True
         assert redfish_client.token is not None
 
         logger.info("Аутентификация прошла успешно")
     
     def test_authentication_response_code(self, redfish_client):
-        """Тест кода ответа при аутентификации"""
         response = redfish_client.session.get(f"{redfish_client.base_url}/redfish/v1/")
         assert response.status_code == 200
 
         logger.info("Код ответа 200 при аутентифицированном запросе")
 
 class TestSystemInfo:
-    """Тесты получения информации о системе"""
-    
     def test_get_system_info_status_code(self, redfish_client):
-        """Тест статус-кода при получении информации о системе"""
         response = redfish_client.session.get(
             f"{redfish_client.base_url}/redfish/v1/Systems/system"
         )
@@ -39,7 +32,6 @@ class TestSystemInfo:
         logger.info("Код ответа 200 при запросе информации о системе")
     
     def test_system_info_contains_status_and_powerstate(self, system_info):
-        """Тест наличия Status и PowerState в ответе"""
         assert "Status" in system_info
         assert "PowerState" in system_info
 
@@ -47,7 +39,6 @@ class TestSystemInfo:
         logger.info(f"Состояние питания: {system_info.get('PowerState')}")
     
     def test_system_info_structure(self, system_info):
-        """Тест структуры ответа информации о системе"""
         required_fields = ["Id", "Name", "Status", "PowerState", "Actions"]
         
         for field in required_fields:
@@ -56,10 +47,7 @@ class TestSystemInfo:
         logger.info("Все обязательные поля присутствуют в ответе")
 
 class TestPowerManagement:
-    """Тесты управления питанием"""
-    
     def test_power_state_reading(self, redfish_client):
-        """Тест чтения состояния питания"""
         system_info = redfish_client.get("/redfish/v1/Systems/system")
         power_state = system_info.get("PowerState")
         
@@ -69,8 +57,6 @@ class TestPowerManagement:
         logger.info(f"Текущее состояние питания: {power_state}")
     
     def test_power_control_endpoint_accessible(self, redfish_client):
-        """Тест доступности endpoint управления питанием"""
-
         power_control_url = "/redfish/v1/Systems/system/Actions/ComputerSystem.Reset"
         test_data = {"ResetType": "On"}
         
@@ -81,7 +67,6 @@ class TestPowerManagement:
         logger.info(f"Endpoint управления питанием доступен, код ответа: {response.status_code}")
     
     def test_power_command_validation(self, redfish_client):
-        """Тест валидации различных команд питания"""
         power_control_url = "/redfish/v1/Systems/system/Actions/ComputerSystem.Reset"
         
         safe_commands = ["On", "GracefulRestart"]
@@ -94,10 +79,8 @@ class TestPowerManagement:
             logger.info(f"Команда {command} принята, код: {response.status_code}")
 
 class TestSystemComponents:
-    """Тесты компонентов системы"""
     
     def test_system_processor_info(self, redfish_client):
-        """Тест информации о процессорах"""
         system_info = redfish_client.get("/redfish/v1/Systems/system")
         processor_summary = system_info.get("ProcessorSummary", {})
         
@@ -111,7 +94,6 @@ class TestSystemComponents:
         logger.info(f"Processors endpoint доступен")
     
     def test_system_memory_info(self, redfish_client):
-        """Тест информации о памяти"""
         system_info = redfish_client.get("/redfish/v1/Systems/system")
         memory_summary = system_info.get("MemorySummary", {})
         
@@ -125,10 +107,7 @@ class TestSystemComponents:
         logger.info(f"Memory endpoint доступен")
     
 class TestChassisInfo:
-    """Тесты информации о шасси"""
-    
     def test_chassis_discovery(self, redfish_client):
-        """Тест обнаружения шасси"""
         chassis_url = "/redfish/v1/Chassis"
         chassis_data = redfish_client.get(chassis_url)
         
@@ -142,7 +121,6 @@ class TestChassisInfo:
         logger.info(f"Найдено шасси: {chassis_detail.get('Name')}")
         
     def test_chassis_thermal(self, redfish_client):
-        """Тест thermal информации шасси"""
         chassis_url = "/redfish/v1/Chassis"
         chassis_data = redfish_client.get(chassis_url)
         
@@ -170,10 +148,7 @@ class TestChassisInfo:
             logger.info("Thermal информация отсутствует в шасси")
 
 class TestErrorHandling:
-    """Тесты обработки ошибок"""
-    
     def test_invalid_authentication(self):
-        """Тест неверной аутентификации"""
         invalid_client = RedfishClient(
             base_url="https://localhost:2443",
             username="wrong_user", 
@@ -188,7 +163,6 @@ class TestErrorHandling:
         logger.info("Обработка неверной аутентификации работает корректно")
     
     def test_invalid_endpoint(self, redfish_client):
-        """Тест запроса к несуществующему endpoint"""
         response = redfish_client.session.get(
             f"{redfish_client.base_url}/redfish/v1/InvalidEndpoint"
         )

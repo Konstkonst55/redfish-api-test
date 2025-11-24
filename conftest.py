@@ -15,8 +15,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class RedfishClient:
-    """Клиент для работы с Redfish API"""
-    
     def __init__(self, base_url: str, username: str, password: str):
         self.base_url = base_url.rstrip('/')
         self.username = username
@@ -27,7 +25,6 @@ class RedfishClient:
         self.authenticated = False
         
     def authenticate(self) -> Optional[str]:
-        """Аутентификация в Redfish API"""
         auth_url = f"{self.base_url}/redfish/v1/SessionService/Sessions"
         auth_data = {
             "UserName": self.username,
@@ -64,7 +61,6 @@ class RedfishClient:
             return None
     
     def get(self, endpoint: str) -> Dict[Any, Any]:
-        """GET запрос к Redfish API"""
         url = f"{self.base_url}{endpoint}"
 
         with warnings.catch_warnings():
@@ -76,7 +72,6 @@ class RedfishClient:
         return response.json()
     
     def post(self, endpoint: str, data: Dict[Any, Any]) -> requests.Response:
-        """POST запрос к Redfish API"""
         url = f"{self.base_url}{endpoint}"
 
         with warnings.catch_warnings():
